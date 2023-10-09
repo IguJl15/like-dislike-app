@@ -1,28 +1,35 @@
-import { Topic } from "../../interfaces/topic";
+import { useContext, useEffect } from "react";
+import { TopicsListContext } from "../../contexts/topics/topics_list_context";
 import { TopicListItem } from "../TopicListITem";
 import { ListContainer } from "./style";
+import { TopicsDispatcherContext } from "../../contexts/topics/topic_dispatcher_context";
+import { ActionType } from "../../reducers/topic_reducer";
+import { TopicService } from "../../providers/topic_service";
 
 
-interface TopicsListProps {
-    topics: Topic[];
-    changeActive: (topic: Topic) => void;
-    likeTopic: (topic: Topic) => void;
-    dislikeTopic: (topic: Topic) => void;
-}
+export function TopicList() {
+  const topics = useContext(TopicsListContext)
+  const topicsActionDispatcher = useContext(TopicsDispatcherContext)
 
+  useEffect(
+    () => {
+      (async () => {
+        const topics = await TopicService.getTopics();
+        topicsActionDispatcher({ type: ActionType.Loaded, payload: { topics } });
+      })();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-export function TopicList({topics, changeActive, likeTopic, dislikeTopic}: TopicsListProps) {
-    return (
-        <ListContainer style={{}}>
-            {topics.map((topic) => (
-          <TopicListItem
-            key={topic.id}
-            topic={topic}
-            changeActive={changeActive}
-            likeTopic={likeTopic}
-            dislikeTopic={dislikeTopic}
-          />
-        ))}
-        </ListContainer>
-    )
+  return (
+    <ListContainer style={{}}>
+      {topics.map((topic) => (
+        <TopicListItem
+          key={topic.id}
+          topic={topic}
+        />
+      ))}
+    </ListContainer>
+  )
 }
